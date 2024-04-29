@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
 	// var userName string = "shafi"
@@ -21,10 +23,24 @@ func main() {
 	myName := "Shafi"
 	fmt.Println(myName)
 
+	///Same type Muntiple varible in one lne
 	var s, b, c int = 4, 10, 60
-
 	fmt.Println(s)
 	fmt.Println(b)
 	fmt.Println(c)
+
+	//Group variable declaration
+	var (
+		roll    int    = 10
+		stuName string = "Shafi"
+	)
+	fmt.Println("Hello my name is", stuName, "and roll is", roll)
+
+	/// Constants
+	const PI float64 = 3.1416 //Typed Constants
+	fmt.Println(PI)
+
+	const abc = 540 //Untyped Constants
+	fmt.Println(abc)
 
 }
