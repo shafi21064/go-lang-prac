@@ -34,7 +34,7 @@ func main() {
 		roll    int    = 10
 		stuName string = "Shafi"
 	)
-	fmt.Println("Hello my name is", stuName, "and roll is", roll)
+	fmt.Printf("Hello my name is %v and roll is %v", stuName, roll)
 
 	/// Constants
 	const PI float64 = 3.1416 //Typed Constants
@@ -43,4 +43,16 @@ func main() {
 	const abc = 540 //Untyped Constants
 	fmt.Println(abc)
 
+	/// Formatting verbs link
+	/// https://www.w3schools.com/go/go_formatting_verbs.php
+
+	/// Arrays
+	var myArray = [4]int{5, 10, 25, 25}
+	fmt.Printf("This is a array %v \n", myArray[3])
+
+	var mySecondArray = [...]int{5, 10, 20, 25, 30}
+	fmt.Printf("This is a non length arrays %v \n", mySecondArray[2])
+
+	myArrayThree := [3]string{"volvo", "hundai", "Hunda"}
+	fmt.Println(myArrayThree[2])
 }
