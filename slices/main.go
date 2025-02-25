@@ -18,4 +18,6 @@ func main() {
 	fruitsSlices = slices.Delete(fruitsSlices, index, index+1)
 	fmt.Println(fruitsSlices)
 
+	//
+
 }

@@ -25,5 +25,5 @@ func main() {
 
 	currentTIme := time.Now()
 
-	fmt.Println("current date is ", currentTIme.Format("01-02-2006 Monday"))
+	fmt.Println("current date is ", currentTIme)
 }
