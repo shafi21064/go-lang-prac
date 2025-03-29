@@ -23,7 +23,7 @@ func main() {
 	myName := "Shafi"
 	fmt.Println(myName)
 
-	///Same type Muntiple varible in one lne
+	///Same type Muntiple varible in one line
 	var s, b, c int = 4, 10, 60
 	fmt.Println(s)
 	fmt.Println(b)
