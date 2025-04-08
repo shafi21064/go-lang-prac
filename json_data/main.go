@@ -15,7 +15,8 @@ type Course struct {
 
 func main() {
 	fmt.Println("Json in golang")
-	EncodeJson()
+	// EncodeJson()
+	DecodeJson()
 }
 
 func EncodeJson() {
@@ -31,4 +32,26 @@ func EncodeJson() {
 	}
 
 	fmt.Printf("%s \n", convertedJson)
+}
+
+func DecodeJson() {
+	jsonData := []byte(
+		`{
+                "name": "Go lang",
+                "price": 1050,
+                "website": "youtube",
+                "tags": ["go","dev"]
+        }`,
+	)
+
+	var courseData Course
+	checkValid := json.Valid(jsonData)
+
+	if !checkValid {
+		fmt.Println("Json data is invalid")
+	} else {
+		fmt.Println("Valid json")
+		json.Unmarshal(jsonData, &courseData)
+		fmt.Printf("%#v\n", courseData)
+	}
 }
