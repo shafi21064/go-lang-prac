@@ -18,14 +18,12 @@ type Course struct {
 	CourseId   string  `json:"course_id"`
 	CourseName string  `json:"course_name"`
 	Price      float32 `json:"price"`
-	Password   string  `json:"-"`
 	Author     *Author `json:"author"`
 }
 
 // Author model
 type Author struct {
 	FullName string `json:"full_name"`
-	Avater   string `json:"avater"`
 	Website  string `json:"website"`
 }
 
@@ -41,8 +39,8 @@ func main() {
 
 	router := mux.NewRouter()
 
-	courses = append(courses, Course{CourseId: "1", CourseName: "Dart", Price: 532, Password: "123", Author: &Author{FullName: "shafi", Avater: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPQi3bgz1IBGVltXBwceHqJseIgLVLxGgsW0_xeFb7zZ8vlai2J3eVPeqTmluGcYLpZ0g&usqp=CAU", Website: "linkdin.com"}})
-	courses = append(courses, Course{CourseId: "2", CourseName: "go-lang", Price: 232, Password: "252", Author: &Author{FullName: "shafi", Avater: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPQi3bgz1IBGVltXBwceHqJseIgLVLxGgsW0_xeFb7zZ8vlai2J3eVPeqTmluGcYLpZ0g&usqp=CAU", Website: "linkdin.com"}})
+	courses = append(courses, Course{CourseId: "1", CourseName: "Dart", Price: 532, Author: &Author{FullName: "shafi"}})
+	courses = append(courses, Course{CourseId: "2", CourseName: "go-lang", Price: 232, Author: &Author{FullName: "shafi", Website: "linkdin.com"}})
 
 	router.HandleFunc("/", ServeHome).Methods("GET")
 	router.HandleFunc("/courses", GetAllCourse).Methods("GET")
@@ -78,11 +76,10 @@ func GetSingleCourse(w http.ResponseWriter, r *http.Request) {
 	for _, course := range courses {
 		if course.CourseId == params["id"] {
 			json.NewEncoder(w).Encode(course)
-			break
-		} else {
-			json.NewEncoder(w).Encode("No course found with the id")
+			return
 		}
 	}
+	json.NewEncoder(w).Encode("No course found with the id")
 }
 
 // create course
@@ -93,54 +90,66 @@ func CreateNewCourse(w http.ResponseWriter, r *http.Request) {
 	//if body is empty
 	if r.Body == nil {
 		json.NewEncoder(w).Encode("Please Input some data")
+		return
 	}
-	var course Course
-	json.NewDecoder(r.Body).Decode(&course)
+	var newCourse Course
+	json.NewDecoder(r.Body).Decode(&newCourse)
 
-	if course.IsEmpty() {
+	if newCourse.IsEmpty() {
 		json.NewEncoder(w).Encode("No data inside json")
+		return
+	}
+
+	for _, course := range courses {
+		if course.CourseName == newCourse.CourseName {
+			fmt.Println(courses)
+			fmt.Println(course.CourseName)
+			json.NewEncoder(w).Encode("This course is alreary availabe")
+			return
+		}
 	}
 
 	rand.NewSource(time.Now().UnixNano())
-	course.CourseId = strconv.Itoa(rand.Intn(1000000))
+	newCourse.CourseId = strconv.Itoa(rand.Intn(1000000))
 
-	courses = append(courses, course)
+	courses = append(courses, newCourse)
 
-	json.NewEncoder(w).Encode(course)
+	json.NewEncoder(w).Encode(newCourse)
 }
 
 // update course
 func UpdateCourse(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Create a new course")
+	fmt.Println("update course")
 	w.Header().Set("Content-Type", "application/json")
 
 	//if body is empty
 	if r.Body == nil {
 		json.NewEncoder(w).Encode("Please Input some data")
+		return
 	}
 	var course Course
 	json.NewDecoder(r.Body).Decode(&course)
 
 	if course.IsEmpty() {
 		json.NewEncoder(w).Encode("No data inside json")
+		return
 	}
 
 	params := mux.Vars(r)
-	for index, course := range courses {
-		if course.CourseId == params["id"] {
-
-			// courses = append(courses[:index], courses[index+1:]... )
+	for index, item := range courses {
+		if item.CourseId == params["id"] {
 			courses = slices.Delete(courses, index, index+1)
 			course.CourseId = params["id"]
+			courses = append(courses, course)
 			json.NewEncoder(w).Encode(course)
-		} else {
-			json.NewEncoder(w).Encode("No course found with the id")
+			return
 		}
 	}
+	json.NewEncoder(w).Encode("No course found with the id")
 }
 
 func DeleteSingleCourse(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Create a new course")
+	fmt.Println("Delete course")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	for index, course := range courses {
@@ -149,9 +158,9 @@ func DeleteSingleCourse(w http.ResponseWriter, r *http.Request) {
 			// courses = append(courses[:index], courses[index+1:]... )
 			courses = slices.Delete(courses, index, index+1)
 			json.NewEncoder(w).Encode("Deleted the course")
-			break
-		} else {
-			json.NewEncoder(w).Encode("No course found with the id")
+			return
 		}
+
 	}
+	json.NewEncoder(w).Encode("No course found with the id")
 }
