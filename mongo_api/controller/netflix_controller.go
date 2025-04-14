@@ -9,7 +9,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/shafi21064/go_mongo_api/model"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -49,44 +48,50 @@ func init() {
 // mongodb helpers
 
 // insert single data
-func insertSingleData(netflixModel model.NetflixModel) {
+func insertSingleData(netflixModel *model.NetflixModel) *mongo.InsertOneResult {
 	inserted, err := collection.InsertOne(context.Background(), netflixModel)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Inserted data id is: ", inserted.InsertedID)
+	return inserted
 }
 
 // update single data
-func updateSingleData(movieId string) {
-	id, _ := primitive.ObjectIDFromHex(movieId)
+func updateSingleData(movieId string) *mongo.UpdateResult {
+	id, _ := bson.ObjectIDFromHex(movieId)
 	filter := bson.M{"_id": id}
 
 	update := bson.M{"$set": bson.M{"watched": true}}
 
-	result, err := collection.UpdateOne(context.Background(), filter, update)
+	result, err := collection.UpdateOne(context.Background(), filter, update, nil)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Modified count: ", result.ModifiedCount)
+	return result
 }
 
 // delete single moovie
 func deleteSingleMovie(movieId string) {
-	id, _ := primitive.ObjectIDFromHex(movieId)
+	fmt.Println("Raw Movie ID:", movieId)
+	id, _ := bson.ObjectIDFromHex(movieId)
 	filter := bson.M{"_id": id}
-	deletedCount, err := collection.DeleteOne(context.Background(), filter)
+	fmt.Println("Delete filter:", filter)
+	result, err := collection.DeleteOne(context.Background(), filter)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Delete error:", err)
+		return
 	}
-	fmt.Println("Delete count: ", deletedCount)
+	fmt.Println(result)
+	fmt.Println("Deleted count:", result.DeletedCount)
 }
 
 // delete all
 func deleteAllData() int64 {
-	deletedResult, err := collection.DeleteMany(context.Background(), bson.D{{}}, nil)
+	deletedResult, err := collection.DeleteMany(context.Background(), bson.M{}, nil)
 
 	if err != nil {
 		log.Fatal(err)
@@ -132,7 +137,7 @@ func CreateMovieCotroller(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Allow-Control-Allow_Method", "POST")
 
-	var movie model.NetflixModel
+	var movie *model.NetflixModel
 	json.NewDecoder(r.Body).Decode(&movie)
 	insertSingleData(movie)
 	json.NewEncoder(w).Encode(movie)
@@ -142,10 +147,9 @@ func CreateMovieCotroller(w http.ResponseWriter, r *http.Request) {
 func MarkAsWatchedControler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Allow-Control-Allow-Method", "PUT")
-	var movie *model.NetflixModel
 	params := mux.Vars(r)
-	updateSingleData(params["id"])
-	json.NewEncoder(w).Encode(&movie)
+	result := updateSingleData(params["id"])
+	json.NewEncoder(w).Encode(result.ModifiedCount)
 }
 
 // delete single movie controller
